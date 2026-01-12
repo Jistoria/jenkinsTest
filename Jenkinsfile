@@ -7,7 +7,24 @@ pipeline {
     }
 
     stages {
+
+        stage('Instalar Dependencias') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Ejecutar tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+
         stage('Construir Imagen Docker') {
+            when {
+                expression { currentBuild.currentResult == null || currentBuild.currentResult == 'SUCCESS'}
+            }
             steps {
                 sh 'docker build -t hola-mundo-node:latest .'
             }
