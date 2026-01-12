@@ -1,13 +1,12 @@
 pipeline {
-    agent any
-
-    tools {
-        nodejs "Node25" // Configura una instalación de Node.js en Jenkins
-        dockerTool 'Dockertool'  // Cambia el nombre de la herramienta según tu configuración en Jenkins
+    agent {
+        docker {
+            image 'node:25-alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
 
     stages {
-
         stage('Instalar Dependencias') {
             steps {
                 sh 'npm install'
@@ -19,7 +18,6 @@ pipeline {
                 sh 'npm test'
             }
         }
-
 
         stage('Construir Imagen Docker') {
             when {
@@ -33,11 +31,8 @@ pipeline {
         stage('Ejecutar Contenedor Node.js') {
             steps {
                 sh '''
-                    # Detener y eliminar cualquier contenedor previo
                     docker stop hola-mundo-node || true
                     docker rm hola-mundo-node || true
-
-                    # Ejecutar el contenedor de la aplicación
                     docker run -d --name hola-mundo-node -p 3000:3000 hola-mundo-node:latest
                 '''
             }
