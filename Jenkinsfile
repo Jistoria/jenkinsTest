@@ -1,26 +1,19 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs "Node18"
+        dockerTool "Dockertool" 
+    }
+
     stages {
-        stage('Instalar Dependencias') {
-            agent {
-                docker {
-                    image 'node:25-alpine'
-                    reuseNode true
-                }
-            }
+        stage('Instalar dependencias') {
             steps {
                 sh 'npm install'
             }
         }
 
         stage('Ejecutar tests') {
-            agent {
-                docker {
-                    image 'node:25-alpine'
-                    reuseNode true
-                }
-            }
             steps {
                 sh 'npm test'
             }
@@ -28,7 +21,7 @@ pipeline {
 
         stage('Construir Imagen Docker') {
             when {
-                expression { currentBuild.currentResult == null || currentBuild.currentResult == 'SUCCESS'}
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
             }
             steps {
                 sh 'docker build -t hola-mundo-node:latest .'
@@ -36,6 +29,9 @@ pipeline {
         }
 
         stage('Ejecutar Contenedor Node.js') {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
             steps {
                 sh '''
                     docker stop hola-mundo-node || true
@@ -46,3 +42,4 @@ pipeline {
         }
     }
 }
+ 
