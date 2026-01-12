@@ -1,19 +1,26 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:25-alpine'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     stages {
         stage('Instalar Dependencias') {
+            agent {
+                docker {
+                    image 'node:25-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 sh 'npm install'
             }
         }
 
         stage('Ejecutar tests') {
+            agent {
+                docker {
+                    image 'node:25-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 sh 'npm test'
             }
